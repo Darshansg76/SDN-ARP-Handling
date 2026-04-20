@@ -64,7 +64,6 @@ In traditional networks, ARP requests are broadcast and handled locally. In this
 
 ```bash
 # Terminal 1 (Controller)
-cd ~/arp-project
 source ryu-env/bin/activate
 ryu-manager arp_controller.py
 
