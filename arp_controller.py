@@ -5,12 +5,16 @@ from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet, ethernet, arp
 from ryu.lib.packet import ether_types
 
+
 class ARPController(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
         super(ARPController, self).__init__(*args, **kwargs)
         self.mac_table = {}
+        self.blocked = {
+            ("10.0.0.1", "10.0.0.2"),
+                    }
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -54,12 +58,14 @@ class ARPController(app_manager.RyuApp):
 
         arp_pkt = pkt.get_protocol(arp.arp)
         if arp_pkt:
-            print(f"\nARP: {arp_pkt.src_ip} → {arp_pkt.dst_ip}")
+            src_ip = arp_pkt.src_ip
+            dst_ip = arp_pkt.dst_ip
 
-          
-            if arp_pkt.src_ip == "10.0.0.1" and arp_pkt.dst_ip == "10.0.0.2":
-              print("BLOCKED: 10.0.0.1 → 10.0.0.2")
-              return 
+            print(f"\nARP: {src_ip} → {dst_ip}")
+
+            if (src_ip, dst_ip) in self.blocked:
+                print(f"BLOCKED: {src_ip} → {dst_ip}")
+                return
 
         if dst in self.mac_table[dpid]:
             out_port = self.mac_table[dpid][dst]
@@ -72,9 +78,11 @@ class ARPController(app_manager.RyuApp):
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
             self.add_flow(dp, 1, match, actions)
 
-        out = parser.OFPPacketOut(datapath=dp,
-                                 buffer_id=msg.buffer_id,
-                                 in_port=in_port,
-                                 actions=actions,
-                                 data=msg.data)
+        out = parser.OFPPacketOut(
+            datapath=dp,
+            buffer_id=msg.buffer_id,
+            in_port=in_port,
+            actions=actions,
+            data=msg.data
+        )
         dp.send_msg(out)
