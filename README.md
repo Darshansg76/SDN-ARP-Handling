@@ -1,8 +1,8 @@
 # ARP Handling in SDN Networks using Ryu Controller
 
 ## Student Details
-- Name: Darshan S Govekar  
-- SRN: PES1UG24AM355  
+- Name: Darshan S Govekar
+- SRN: PES1UG24AM355
 
 ---
 
@@ -32,9 +32,9 @@ In traditional networks, ARP requests are broadcast and handled locally. In this
 ## Network Topology
 - 1 Switch (s1)
 - 3 Hosts:
-  - h1 → 10.0.0.1  
-  - h2 → 10.0.0.2  
-  - h3 → 10.0.0.3  
+  - h1 → 10.0.0.1
+  - h2 → 10.0.0.2
+  - h3 → 10.0.0.3
 
 ---
 
@@ -62,7 +62,15 @@ In traditional networks, ARP requests are broadcast and handled locally. In this
 
 ## How to Run
 
-### Start Controller
 ```bash
+# Terminal 1 (Controller)
+cd ~/arp-project
 source ryu-env/bin/activate
 ryu-manager arp_controller.py
+
+# Terminal 2 (Mininet)
+sudo mn -c
+sudo mn --controller=remote --switch ovsk --topo single,3
+
+# Inside Mininet
+pingall
