@@ -1,75 +1,77 @@
-# ARP Handling in SDN Networks using Ryu Controller
+# SDN ARP Controller using Ryu
 
-## Student Details
-- Name: Darshan S Govekar
-- SRN: PES1UG24AM355
+## Overview
 
----
-
-## Project Overview
-This project demonstrates ARP (Address Resolution Protocol) handling in a Software Defined Network (SDN) using the Ryu controller and Mininet emulator.
-
-In traditional networks, ARP requests are broadcast and handled locally. In this project, a centralized SDN controller intercepts ARP packets and applies custom logic to control communication between hosts.
+This project implements an ARP handling mechanism using Software Defined Networking (SDN) with the Ryu controller.
+The controller centrally manages ARP resolution using proxy ARP, reducing broadcast overhead and improving efficiency.
 
 ---
 
-## Objective
-- Understand ARP in SDN
-- Implement packet interception using Ryu
-- Apply match-action rules
-- Demonstrate policy-based blocking
+## Architecture
+
+Hosts (h1, h2, h3) → OpenFlow Switch (s1) → Ryu Controller
 
 ---
 
-## Tools Used
-- Mininet
-- Ryu Controller
-- OpenFlow
-- Ubuntu Linux
+## Features
+
+* Proxy ARP (controller-generated ARP replies)
+* IP to MAC learning (ARP table)
+* MAC to Port learning (learning switch behavior)
+* Dynamic flow rule installation
+* Reduced broadcast traffic
+* Flow timeout handling
 
 ---
 
-## Network Topology
-- 1 Switch (s1)
-- 3 Hosts:
-  - h1 → 10.0.0.1
-  - h2 → 10.0.0.2
-  - h3 → 10.0.0.3
+## Technologies Used
 
----
-
-## Working
-1. Host sends ARP request
-2. Switch forwards packet to controller
-3. Controller intercepts ARP
-4. Applies rule:
-   - Allow OR
-   - Block
-
----
-
-## Scenarios
-
-### Scenario 1: Normal
-- No blocking
-- Result: 0% packet loss
-
-### Scenario 2: Blocking
-- Block: 10.0.0.1 → 10.0.0.2
-- Result: Partial packet loss (~33%)
+Python, Ryu SDN Controller, Mininet, OpenFlow Protocol
 
 ---
 
 ## How to Run
 
 ```bash
-# Terminal 1 (Controller)
-source ryu-env/bin/activate
-ryu-manager arp_controller.py
+source ryu_env/bin/activate
+ryu-manager --ofp-tcp-listen-port 6653 arp_controller.py
 
-# Terminal 2 (Mininet)
+# open new terminal
 sudo mn -c
-sudo mn --controller=remote --switch ovsk --topo single,3
+sudo mn --topo single,3 --controller remote
 
-# Inside Mininet
+# inside mininet
 pingall
+dpctl dump-flows
+```
+
+---
+
+## Expected Output
+
+* 0% packet loss in pingall
+* ARP learning logs in controller
+* Proxy ARP replies
+* Flow rules installed dynamically
+
+---
+
+## Performance Insight
+
+The first packet is processed by the controller, after which flow rules are installed in the switch.
+Subsequent packets are forwarded directly, reducing latency and controller load.
+
+---
+
+## Project Structure
+
+arp-project/
+├── arp_controller.py
+├── README.md
+└── screenshot-sdn/
+
+---
+
+## Author
+
+Darshan Govekar
